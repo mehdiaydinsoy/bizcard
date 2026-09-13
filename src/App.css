@@ -172,6 +172,10 @@ h1 {
   opacity: 0.92;
 }
 
+.qr {
+  margin: 22px 0 0;
+}
+
 .note {
   margin-top: 16px;
   font-size: 11.5px;

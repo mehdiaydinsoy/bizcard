@@ -1,3 +1,5 @@
+import { QRCodeSVG } from 'qrcode.react'
+
 const CONTACT = {
   firstName: 'Mehdi',
   lastName: 'Qasimov',
@@ -44,6 +46,15 @@ function ContactLink({ icon, label, value, href }) {
       {label}
       <span className="value">{value}</span>
     </a>
+  )
+}
+
+function CardQRCode() {
+  return (
+    <div className="qr">
+      {/* fgColor SVG atributu var()-u tanımır, ona görə hazır hex dəyəri verilir */}
+      <QRCodeSVG value={window.location.href} size={120} fgColor="#1c2230" bgColor="transparent" />
+    </div>
   )
 }
 
@@ -109,6 +120,8 @@ export default function App() {
       <button className="save-btn" onClick={downloadVCard}>
         Kontakta əlavə et
       </button>
+
+      <CardQRCode />
 
       <p className="note">
         Əlaqə linkləri <code>src/App.jsx</code> faylındakı <code>CONTACT</code> obyektindən
