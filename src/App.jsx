@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
+import { sendEvent } from './webhook'
 
 const CONTACT = {
   firstName: 'Mehdi',
@@ -81,6 +83,59 @@ function downloadVCard() {
 }
 
 export default function App() {
+  const [saveStatus, setSaveStatus] = useState('idle')
+  const [meetingFields, setMeetingFields] = useState({ name: '', email: '', topic: '' })
+  const [errors, setErrors] = useState({})
+  const [meetingStatus, setMeetingStatus] = useState('idle')
+
+  async function handleCardSave() {
+    setSaveStatus('sending')
+    try {
+      await sendEvent('card_saved', { name: CONTACT.fullName })
+      setSaveStatus('success')
+    } catch (err) {
+      console.error('Kart saxlanmadı:', err)
+      setSaveStatus('error')
+    }
+  }
+
+  async function handleMeetingSubmit(e) {
+    e.preventDefault()
+
+    const name = meetingFields.name.trim()
+    const email = meetingFields.email.trim()
+    const topic = meetingFields.topic.trim()
+    const nextErrors = {}
+
+    if (!name) {
+      nextErrors.name = 'Adını daxil et'
+    }
+    if (!email) {
+      nextErrors.email = 'E-poçt ünvanını daxil et'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = 'E-poçt ünvanı düzgün görünmür'
+    }
+    if (!topic) {
+      nextErrors.topic = 'Mövzunu qeyd et'
+    }
+
+    setErrors(nextErrors)
+
+    if (Object.keys(nextErrors).length > 0) {
+      return
+    }
+
+    setMeetingStatus('sending')
+    try {
+      await sendEvent('meeting_requested', { name, email, topic })
+      setMeetingStatus('success')
+      setMeetingFields({ name: '', email: '', topic: '' })
+    } catch (err) {
+      console.error('Görüş tələbi göndərilmədi:', err)
+      setMeetingStatus('error')
+    }
+  }
+
   return (
     <div className="card">
       <div className="avatar">{INITIALS}</div>
@@ -122,6 +177,62 @@ export default function App() {
       </button>
 
       <CardQRCode />
+
+      <button className="card-save-btn" onClick={handleCardSave} disabled={saveStatus === 'sending'}>
+        Kartı yadda saxla
+      </button>
+      {saveStatus === 'success' && (
+        <p className="status-message status-message--success">Kart yadda saxlanıldı.</p>
+      )}
+      {saveStatus === 'error' && (
+        <p className="status-message status-message--error">Saxlanılmadı, bir azdan yenidən cəhd et.</p>
+      )}
+
+      <h2 className="skills-title">Toplantı tələb et</h2>
+      <form className="meeting-form" onSubmit={handleMeetingSubmit} noValidate>
+        <div className="form-field">
+          <label className="form-label" htmlFor="meeting-name">Ad</label>
+          <input
+            id="meeting-name"
+            className="form-input"
+            type="text"
+            value={meetingFields.name}
+            onChange={(e) => setMeetingFields({ ...meetingFields, name: e.target.value })}
+          />
+          {errors.name && <p className="field-error">{errors.name}</p>}
+        </div>
+        <div className="form-field">
+          <label className="form-label" htmlFor="meeting-email">E-poçt</label>
+          <input
+            id="meeting-email"
+            className="form-input"
+            type="email"
+            value={meetingFields.email}
+            onChange={(e) => setMeetingFields({ ...meetingFields, email: e.target.value })}
+          />
+          {errors.email && <p className="field-error">{errors.email}</p>}
+        </div>
+        <div className="form-field">
+          <label className="form-label" htmlFor="meeting-topic">Mövzu</label>
+          <input
+            id="meeting-topic"
+            className="form-input"
+            type="text"
+            value={meetingFields.topic}
+            onChange={(e) => setMeetingFields({ ...meetingFields, topic: e.target.value })}
+          />
+          {errors.topic && <p className="field-error">{errors.topic}</p>}
+        </div>
+        <button className="form-submit-btn" type="submit" disabled={meetingStatus === 'sending'}>
+          Göndər
+        </button>
+        {meetingStatus === 'success' && (
+          <p className="status-message status-message--success">Görüş tələbiniz göndərildi. Tezliklə əlaqə saxlayacağıq.</p>
+        )}
+        {meetingStatus === 'error' && (
+          <p className="status-message status-message--error">Göndərilmədi, bir azdan yenidən cəhd et.</p>
+        )}
+      </form>
 
       <p className="note">
         Əlaqə linkləri <code>src/App.jsx</code> faylındakı <code>CONTACT</code> obyektindən

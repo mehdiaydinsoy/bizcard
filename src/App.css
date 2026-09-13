@@ -8,6 +8,7 @@
   --accent-soft: #eef1ff;
   --border: #e7eaf0;
   --shadow: 0 20px 45px -20px rgba(30, 41, 59, 0.35);
+  --error: #d64545;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +22,7 @@
     --accent-soft: #232c44;
     --border: #2a3348;
     --shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.6);
+    --error: #ff6b6b;
   }
 }
 
@@ -187,4 +189,104 @@ h1 {
   background: var(--accent-soft);
   padding: 1px 5px;
   border-radius: 6px;
+}
+
+.card-save-btn {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-save-btn:hover {
+  opacity: 0.92;
+}
+
+.card-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.meeting-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+  text-align: left;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.form-input {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  color: var(--text-main);
+  font-size: 14.5px;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field-error {
+  color: var(--error);
+  font-size: 12px;
+  margin: 0;
+}
+
+.form-submit-btn {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-submit-btn:hover {
+  opacity: 0.92;
+}
+
+.form-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-message {
+  font-size: 12.5px;
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.status-message--success {
+  color: var(--accent);
+}
+
+.status-message--error {
+  color: var(--error);
 }
