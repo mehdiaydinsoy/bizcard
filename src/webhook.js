@@ -1,4 +1,4 @@
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL
+const WEBHOOK_URL = process.env.EXPO_PUBLIC_WEBHOOK_URL
 
 export async function sendEvent(event, fields = {}) {
   if (!WEBHOOK_URL) return
