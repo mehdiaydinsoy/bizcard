@@ -246,7 +246,18 @@ export default function App() {
               checked={consentChecked}
               onChange={(e) => setConsentChecked(e.target.checked)}
             />
-            Şəxsi məlumatlarımın bu tələbi cavablandırmaq üçün emal olunmasına razıyam.
+            <span>
+              Şəxsi məlumatlarımın bu tələbi cavablandırmaq üçün emal olunmasına razıyam.{' '}
+              (<a
+                className="privacy-link"
+                href="/privacy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Məxfilik Siyasəti
+              </a>)
+            </span>
           </label>
           {errors.consent && <p className="field-error">{errors.consent}</p>}
         </div>
@@ -265,6 +276,8 @@ export default function App() {
         Əlaqə linkləri <code>src/App.jsx</code> faylındakı <code>CONTACT</code> obyektindən
         oxunur — dəyişmək üçün orada redaktə et.
       </p>
+
+      <a className="privacy-link footer-link" href="/privacy.html">Məxfilik Siyasəti</a>
     </div>
   )
 }
