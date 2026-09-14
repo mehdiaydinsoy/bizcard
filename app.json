@@ -10,6 +10,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.mehdiqasimov.bizcard",
       "adaptiveIcon": {
         "backgroundColor": "#3457d5",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -34,6 +35,11 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "76bb248b-ba4a-4385-bdf4-f077e64d37a1"
+      }
+    }
   }
 }
