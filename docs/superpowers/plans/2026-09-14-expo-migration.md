@@ -38,7 +38,7 @@
 >
 > **Note (breaking API in `@testing-library/react-native` v14):** `render()`, `renderHook()`, and every `fireEvent.*` call (`fireEvent.press`, `fireEvent.changeText`, etc.) are now `async` — every call must be `await`ed and every test that uses them must be an `async` test function. Skipping `await` on `fireEvent` doesn't throw, it just silently leaves the resulting state update unflushed, so the next synchronous assertion sees stale output (and Jest logs "overlapping act() calls" warnings that bleed into later tests in the same file). All test code below already reflects this.
 
-- [ ] **Step 1: Scaffold a throwaway Expo project to source current versions and boilerplate**
+- [x] **Step 1: Scaffold a throwaway Expo project to source current versions and boilerplate**
 
 ```bash
 SCAFFOLD_DIR=$(mktemp -d)
@@ -48,7 +48,7 @@ cat "$SCAFFOLD_DIR/scaffold/package.json"
 
 Expected: command completes without error; note the `expo`, `react`, and `react-native` version strings printed in `package.json` — they'll already be correct in the file you copy next, so no need to type them by hand.
 
-- [ ] **Step 2: Copy the generated config/assets into the repo, then remove the scaffold**
+- [x] **Step 2: Copy the generated config/assets into the repo, then remove the scaffold**
 
 Inspect what the scaffold actually generated first (`ls "$SCAFFOLD_DIR/scaffold"`) — copy `babel.config.js` too only if it exists.
 
@@ -59,7 +59,7 @@ cp -r "$SCAFFOLD_DIR/scaffold/assets" ./assets
 rm -rf "$SCAFFOLD_DIR"
 ```
 
-- [ ] **Step 3: Fix identity fields in `package.json` and `app.json`**
+- [x] **Step 3: Fix identity fields in `package.json` and `app.json`**
 
 ```bash
 npm pkg set name=bizcard version=0.0.1 private=true
@@ -68,14 +68,14 @@ npm pkg delete scripts.web
 
 Edit `app.json`: set `expo.name` and `expo.slug` to `"bizcard"`, and add `"userInterfaceStyle": "automatic"` at the `expo` level (so the OS-level chrome follows system light/dark mode, matching the app's own theme).
 
-- [ ] **Step 4: Remove the old Vite files**
+- [x] **Step 4: Remove the old Vite files**
 
 ```bash
 git rm -f vite.config.js index.html privacy.html src/main.jsx src/privacy-main.jsx src/App.css
 git rm -rf .vercel
 ```
 
-- [ ] **Step 5: Install base dependencies, then add QR/icon and test libraries**
+- [x] **Step 5: Install base dependencies, then add QR/icon and test libraries**
 
 ```bash
 npm install
@@ -83,14 +83,14 @@ npx expo install react-native-svg react-native-qrcode-svg
 npm install --save-dev jest-expo @testing-library/react-native react-test-renderer
 ```
 
-- [ ] **Step 6: Wire up Jest**
+- [x] **Step 6: Wire up Jest**
 
 ```bash
 npm pkg set jest.preset=jest-expo
 npm pkg set scripts.test=jest
 ```
 
-- [ ] **Step 7: Update `.gitignore` and `.env`**
+- [x] **Step 7: Update `.gitignore` and `.env`**
 
 Edit `.gitignore` to:
 
@@ -108,7 +108,7 @@ Edit `.env` — rename the key, keep the value identical:
 EXPO_PUBLIC_WEBHOOK_URL=https://webhook.site/79f77807-c176-47cb-8b69-62474ccf4eac
 ```
 
-- [ ] **Step 8: Write the failing placeholder test**
+- [x] **Step 8: Write the failing placeholder test**
 
 Create `src/App.test.jsx`:
 
@@ -122,12 +122,12 @@ test('renders a BizCard placeholder', async () => {
 })
 ```
 
-- [ ] **Step 9: Run the test and confirm it fails**
+- [x] **Step 9: Run the test and confirm it fails**
 
 Run: `npm test -- src/App.test.jsx`
 Expected: FAIL — `src/App.jsx` still contains the old DOM-based JSX (`<div>`, CSS class names), which isn't valid inside React Native's renderer.
 
-- [ ] **Step 10: Replace `src/App.jsx` with a minimal RN placeholder and create the root entry file**
+- [x] **Step 10: Replace `src/App.jsx` with a minimal RN placeholder and create the root entry file**
 
 Overwrite `src/App.jsx`:
 
@@ -157,17 +157,17 @@ import App from './src/App'
 registerRootComponent(App)
 ```
 
-- [ ] **Step 11: Run the test again and confirm it passes**
+- [x] **Step 11: Run the test again and confirm it passes**
 
 Run: `npm test -- src/App.test.jsx`
 Expected: PASS
 
-- [ ] **Step 12: Verify the whole toolchain bundles**
+- [x] **Step 12: Verify the whole toolchain bundles**
 
 Run: `npx expo export --platform android`
 Expected: completes without error (proves `babel.config.js`, `app.json`, and dependencies are wired correctly).
 
-- [ ] **Step 13: Commit**
+- [x] **Step 13: Commit**
 
 ```bash
 git add -A
@@ -185,7 +185,7 @@ git commit -m "Expo scaffold: replace Vite setup with managed Expo project + Jes
 - Produces: `export const lightColors`, `export const darkColors` (both objects with keys `bg`, `cardBg`, `textMain`, `textSub`, `accent`, `accentSoft`, `border`, `error`); `export function useTheme()` returning one of those two objects based on `useColorScheme()`.
 - Consumed by: `src/App.jsx`, `src/CardScreen.jsx`, `src/PrivacyPolicy.jsx`, `src/MeetingForm.jsx` (later tasks).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/theme.test.js`:
 
@@ -220,12 +220,12 @@ test('falls back to light colors when the scheme is unknown', async () => {
 
 > **Note:** mocking the whole `'react-native'` module (e.g. `{...jest.requireActual('react-native'), useColorScheme: jest.fn()}`) crashes — spreading forces eager evaluation of native-module getters that aren't available under Jest. Mock the specific leaf file `react-native/Libraries/Utilities/useColorScheme` instead, shaped as `{ __esModule: true, default: jest.fn() }` (react-native's own `index.js` reads `.default` off it directly).
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/theme.test.js`
 Expected: FAIL with "Cannot find module './theme'"
 
-- [ ] **Step 3: Implement `src/theme.js`**
+- [x] **Step 3: Implement `src/theme.js`**
 
 ```js
 import { useColorScheme } from 'react-native'
@@ -258,12 +258,12 @@ export function useTheme() {
 }
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/theme.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/theme.js src/theme.test.js
@@ -281,7 +281,7 @@ git commit -m "Add light/dark theme module"
 - Produces: `export function sanitizeInput(value: string): string`, `export function isValidEmail(value: string): boolean`.
 - Consumed by: `src/MeetingForm.jsx` (Task 7).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/validation.test.js`:
 
@@ -309,12 +309,12 @@ test('isValidEmail rejects a string without a domain dot', () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/validation.test.js`
 Expected: FAIL with "Cannot find module './validation'"
 
-- [ ] **Step 3: Implement `src/validation.js`**
+- [x] **Step 3: Implement `src/validation.js`**
 
 ```js
 export function sanitizeInput(value) {
@@ -326,12 +326,12 @@ export function isValidEmail(value) {
 }
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/validation.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/validation.js src/validation.test.js
@@ -350,7 +350,7 @@ git commit -m "Add sanitizeInput/isValidEmail validation helpers"
 - Produces: `export async function sendEvent(event: string, fields?: object): Promise<void>` — throws `Error` when the response isn't ok; no-ops when `EXPO_PUBLIC_WEBHOOK_URL` is unset.
 - Consumed by: `src/CardScreen.jsx` (Task 8), `src/MeetingForm.jsx` (Task 7).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/webhook.test.js`:
 
@@ -401,12 +401,12 @@ test('does nothing when no webhook URL is configured', async () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/webhook.test.js`
 Expected: FAIL — current `src/webhook.js` reads `import.meta.env.VITE_WEBHOOK_URL`, which is `undefined` under Jest/Node, so the "posts the event payload" test fails (fetch never called).
 
-- [ ] **Step 3: Update `src/webhook.js`**
+- [x] **Step 3: Update `src/webhook.js`**
 
 ```js
 const WEBHOOK_URL = process.env.EXPO_PUBLIC_WEBHOOK_URL
@@ -432,12 +432,12 @@ export async function sendEvent(event, fields = {}) {
 }
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/webhook.test.js`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/webhook.js src/webhook.test.js
@@ -455,7 +455,7 @@ git commit -m "Switch webhook module to EXPO_PUBLIC_WEBHOOK_URL"
 - Produces: `export const CONTACT` (object: `firstName`, `lastName`, `fullName`, `title`, `email`, `linkedin`, `github`), `export const SKILLS` (string array).
 - Consumed by: `src/CardScreen.jsx` (Task 8).
 
-- [ ] **Step 1: Create the contact data module (no test — static data, not logic)**
+- [x] **Step 1: Create the contact data module (no test — static data, not logic)**
 
 Create `src/contact.js`:
 
@@ -473,7 +473,7 @@ export const CONTACT = {
 export const SKILLS = ['Python', 'HTML/CSS', 'Verilənlər Bazası', 'Alqoritmlər']
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add src/contact.js
@@ -493,7 +493,7 @@ git commit -m "Add contact data module"
 - Produces: default export `PrivacyPolicy({ onBack: () => void })` — a React component.
 - Consumed by: `src/App.jsx` (Task 9).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/PrivacyPolicy.test.jsx`:
 
@@ -514,12 +514,12 @@ test('calls onBack when a back link is pressed', async () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/PrivacyPolicy.test.jsx`
 Expected: FAIL — current `src/PrivacyPolicy.jsx` renders DOM elements (`<div>`, `<a>`), invalid under React Native's renderer.
 
-- [ ] **Step 3: Rewrite `src/PrivacyPolicy.jsx`**
+- [x] **Step 3: Rewrite `src/PrivacyPolicy.jsx`**
 
 ```jsx
 import { ScrollView, View, Text, Pressable, Linking, StyleSheet } from 'react-native'
@@ -651,12 +651,12 @@ const styles = StyleSheet.create({
 
 Note: the "Üçüncü tərəflər" section drops the old Vercel bullet — the app no longer runs on Vercel, so only n8n (the form's data processor) remains accurate.
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/PrivacyPolicy.test.jsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/PrivacyPolicy.jsx src/PrivacyPolicy.test.jsx
@@ -675,7 +675,7 @@ git commit -m "Rewrite privacy policy as a React Native screen"
 - Produces: default export `MeetingForm({ onOpenPrivacy: () => void })`.
 - Consumed by: `src/CardScreen.jsx` (Task 8).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/MeetingForm.test.jsx`:
 
@@ -747,12 +747,12 @@ test('calls onOpenPrivacy when the consent privacy link is pressed', async () =>
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/MeetingForm.test.jsx`
 Expected: FAIL with "Cannot find module './MeetingForm'"
 
-- [ ] **Step 3: Implement `src/MeetingForm.jsx`**
+- [x] **Step 3: Implement `src/MeetingForm.jsx`**
 
 ```jsx
 import { useState } from 'react'
@@ -908,12 +908,12 @@ const styles = StyleSheet.create({
 })
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/MeetingForm.test.jsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/MeetingForm.jsx src/MeetingForm.test.jsx
@@ -934,7 +934,7 @@ git commit -m "Add meeting request form as a React Native component"
 
 Note: the QR code encodes `CONTACT.linkedin` (a plain URL). The old web version encoded `window.location.href`, which has no equivalent now that there's no hosted web page — and per the Global Constraints, it must not encode vCard text either, since that would recreate the excluded "add to contacts" path through the back door.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/CardScreen.test.jsx`:
 
@@ -1002,12 +1002,12 @@ test('calls onOpenPrivacy when the footer privacy link is pressed', async () => 
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/CardScreen.test.jsx`
 Expected: FAIL with "Cannot find module './CardScreen'"
 
-- [ ] **Step 3: Implement `src/CardScreen.jsx`**
+- [x] **Step 3: Implement `src/CardScreen.jsx`**
 
 ```jsx
 import { useState } from 'react'
@@ -1162,12 +1162,12 @@ const styles = StyleSheet.create({
 })
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/CardScreen.test.jsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/CardScreen.jsx src/CardScreen.test.jsx
@@ -1185,7 +1185,7 @@ git commit -m "Add card screen: links, skills, QR code, webhook save"
 - Consumes: `CardScreen` (Task 8), `PrivacyPolicy` (Task 6), `useTheme` (Task 2), `SafeAreaView` from `react-native-safe-area-context` (run `npx expo install react-native-safe-area-context` first — `react-native`'s own `SafeAreaView` is deprecated and warns at render time).
 - Produces: default export `App()` — the full composed app, unchanged signature from Task 1 (root `index.js` needs no changes).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Overwrite `src/App.test.jsx`:
 
@@ -1220,12 +1220,12 @@ test('navigates to the privacy screen and back', async () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 Run: `npm test -- src/App.test.jsx`
 Expected: FAIL — `src/App.jsx` is still the Task 1 placeholder (`Text: 'BizCard'`), it doesn't render `CONTACT.fullName` or a testID `open-privacy-link`.
 
-- [ ] **Step 3: Rewrite `src/App.jsx`**
+- [x] **Step 3: Rewrite `src/App.jsx`**
 
 ```jsx
 import { useState } from 'react'
@@ -1255,12 +1255,12 @@ const styles = StyleSheet.create({
 })
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 Run: `npm test -- src/App.test.jsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/App.jsx src/App.test.jsx
@@ -1276,12 +1276,12 @@ git commit -m "Wire up card/privacy screen toggle in root App"
 
 **Interfaces:** none (integration/documentation task).
 
-- [ ] **Step 1: Run the full test suite**
+- [x] **Step 1: Run the full test suite**
 
 Run: `npm test`
 Expected: all test files from Tasks 1–9 pass (no failures).
 
-- [ ] **Step 2: Verify the full app bundles for both platforms**
+- [x] **Step 2: Verify the full app bundles for both platforms**
 
 ```bash
 npx expo export --platform android
@@ -1290,7 +1290,7 @@ npx expo export --platform ios
 
 Expected: both complete without error.
 
-- [ ] **Step 3: Update `CLAUDE.md`**
+- [x] **Step 3: Update `CLAUDE.md`**
 
 In the "Layihə haqqında" / "Növbəti addımlar" area, replace the unchecked stack item and add a run-commands note. Edit the "Növbəti addımlar (bu faylı yeniləmək üçün)" section to:
 
@@ -1309,14 +1309,14 @@ In the "Layihə haqqında" / "Növbəti addımlar" area, replace the unchecked s
 - [ ] Layihə qovluq strukturu qərarlaşdıqdan sonra qısa xəritə əlavə et
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add CLAUDE.md
 git commit -m "Document Expo stack and run commands in CLAUDE.md"
 ```
 
-- [ ] **Step 5: Manual Expo Go verification checklist (for the user — not automatable here)**
+- [x] **Step 5: Manual Expo Go verification checklist (for the user — not automatable here)**
 
 Report this checklist so the user can run it themselves:
 
