@@ -190,14 +190,14 @@ git commit -m "Expo scaffold: replace Vite setup with managed Expo project + Jes
 Create `src/theme.test.js`:
 
 ```js
+import useColorScheme from 'react-native/Libraries/Utilities/useColorScheme'
 import { renderHook } from '@testing-library/react-native'
-import { useColorScheme } from 'react-native'
 import { useTheme, lightColors, darkColors } from './theme'
 
-jest.mock('react-native', () => {
-  const actual = jest.requireActual('react-native')
-  return { ...actual, useColorScheme: jest.fn() }
-})
+jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
 
 test('returns light colors when the scheme is light', async () => {
   useColorScheme.mockReturnValue('light')
@@ -217,6 +217,8 @@ test('falls back to light colors when the scheme is unknown', async () => {
   expect(result.current).toEqual(lightColors)
 })
 ```
+
+> **Note:** mocking the whole `'react-native'` module (e.g. `{...jest.requireActual('react-native'), useColorScheme: jest.fn()}`) crashes — spreading forces eager evaluation of native-module getters that aren't available under Jest. Mock the specific leaf file `react-native/Libraries/Utilities/useColorScheme` instead, shaped as `{ __esModule: true, default: jest.fn() }` (react-native's own `index.js` reads `.default` off it directly).
 
 - [ ] **Step 2: Run the tests and confirm they fail**
 
