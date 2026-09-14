@@ -3,10 +3,15 @@
 ## Layihə haqqında
 BizCard — rəqəmsal vizit kartı yaratmaq üçün tətbiqdir. İstifadəçilərə öz əlaqə məlumatlarını, sosial linklərini və şəxsi/peşəkar brendini asanlıqla paylaşa biləcəkləri müasir, sürətli və mobil-dost bir vizit kartı təcrübəsi təqdim etmək məqsədi daşıyır.
 
-Layihə hazırda erkən mərhələdədir — texnologiya seçimləri və struktur hələ formalaşır. Bu fayl layihə böyüdükcə yenilənməlidir (stack, qovluq strukturu, komandalar və s. məlum olduqca əlavə et).
-
 - **Sektor** — texnologiya/tələbə
 - **Hədəf kütlə** — potensial işəgötürənlər və şəbəkə qurmaq istədiyim peşəkarlar
+
+## Stack
+
+- **Runtime**: Expo (managed workflow), React Native
+- **Test**: `npm test` (Jest, `jest-expo` preset + `@testing-library/react-native`)
+- **İşə salmaq**: `npm start` → Expo Go tətbiqi ilə göstərilən QR kodu skan et
+- **Webhook**: `.env`-də `EXPO_PUBLIC_WEBHOOK_URL`
 
 ## Ton və üslub
 Bütün istifadəçiyə görünən mətnlər (UI mətnləri, xəta mesajları, onboarding, marketinq kopiyası) aşağıdakı tona uyğun olmalıdır:
@@ -20,10 +25,10 @@ Bütün istifadəçiyə görünən mətnlər (UI mətnləri, xəta mesajları, o
 ## Kod və inkişaf prinsipləri
 - Yeni asılılıq və ya abstraksiya əlavə etməzdən əvvəl həqiqətən lazım olduğuna əmin ol.
 - Kod şərhləri minimal saxlanılsın — yalnız "niyə" aydın olmayanda şərh yaz.
-- UI dəyişiklikləri edildikdə brauzerdə real olaraq test et (bu fayl yenilənəndə uyğun run/dev komandaları buraya əlavə olunmalıdır).
+- UI dəyişiklikləri edildikdə Expo Go ilə real cihazda test et (`npm start`).
 
 ## Növbəti addımlar (bu faylı yeniləmək üçün)
-- [ ] Frontend/backend stack seçimi (məs. React/Next.js, Vite, mobil framework və s.)
+- [x] Frontend stack seçimi — Expo / React Native
 - [ ] Verilənlər bazası və autentifikasiya yanaşması
-- [ ] Deploy/hosting platforması
+- [ ] Store deploy (EAS Build / App Store / Play Store) qərarlaşdıqda əlavə et
 - [ ] Layihə qovluq strukturu qərarlaşdıqdan sonra qısa xəritə əlavə et
