@@ -91,6 +91,7 @@ function downloadVCard() {
 export default function App() {
   const [saveStatus, setSaveStatus] = useState('idle')
   const [meetingFields, setMeetingFields] = useState({ name: '', email: '', topic: '' })
+  const [consentChecked, setConsentChecked] = useState(false)
   const [errors, setErrors] = useState({})
   const [meetingStatus, setMeetingStatus] = useState('idle')
 
@@ -128,6 +129,9 @@ export default function App() {
     if (!topic) {
       nextErrors.topic = 'Mövzunu qeyd et'
     }
+    if (!consentChecked) {
+      nextErrors.consent = 'Davam etmək üçün razılığını təsdiqlə'
+    }
 
     setErrors(nextErrors)
 
@@ -140,6 +144,7 @@ export default function App() {
       await sendEvent('meeting_requested', { name, email, topic })
       setMeetingStatus('success')
       setMeetingFields({ name: '', email: '', topic: '' })
+      setConsentChecked(false)
     } catch (err) {
       console.error('Görüş tələbi göndərilmədi:', err)
       setMeetingStatus('error')
@@ -232,6 +237,18 @@ export default function App() {
             onChange={(e) => setMeetingFields({ ...meetingFields, topic: e.target.value })}
           />
           {errors.topic && <p className="field-error">{errors.topic}</p>}
+        </div>
+        <div className="form-checkbox-field">
+          <label className="form-checkbox-label" htmlFor="meeting-consent">
+            <input
+              id="meeting-consent"
+              type="checkbox"
+              checked={consentChecked}
+              onChange={(e) => setConsentChecked(e.target.checked)}
+            />
+            Şəxsi məlumatlarımın bu tələbi cavablandırmaq üçün emal olunmasına razıyam.
+          </label>
+          {errors.consent && <p className="field-error">{errors.consent}</p>}
         </div>
         <button className="form-submit-btn" type="submit" disabled={meetingStatus === 'sending'}>
           Göndər
