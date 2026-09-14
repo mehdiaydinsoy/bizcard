@@ -1182,7 +1182,7 @@ git commit -m "Add card screen: links, skills, QR code, webhook save"
 - Modify: `src/App.jsx` (replace Task 1's placeholder), `src/App.test.jsx` (replace Task 1's placeholder test)
 
 **Interfaces:**
-- Consumes: `CardScreen` (Task 8), `PrivacyPolicy` (Task 6), `useTheme` (Task 2).
+- Consumes: `CardScreen` (Task 8), `PrivacyPolicy` (Task 6), `useTheme` (Task 2), `SafeAreaView` from `react-native-safe-area-context` (run `npx expo install react-native-safe-area-context` first — `react-native`'s own `SafeAreaView` is deprecated and warns at render time).
 - Produces: default export `App()` — the full composed app, unchanged signature from Task 1 (root `index.js` needs no changes).
 
 - [ ] **Step 1: Write the failing tests**
@@ -1229,7 +1229,8 @@ Expected: FAIL — `src/App.jsx` is still the Task 1 placeholder (`Text: 'BizCar
 
 ```jsx
 import { useState } from 'react'
-import { SafeAreaView, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import CardScreen from './CardScreen'
 import PrivacyPolicy from './PrivacyPolicy'
 import { useTheme } from './theme'
