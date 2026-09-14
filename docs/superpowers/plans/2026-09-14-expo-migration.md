@@ -36,7 +36,7 @@
 
 > **Note (actual scaffold output may vary by SDK version):** the current Expo blank template (SDK 57) ships an `index.js` entry (`registerRootComponent(App)`) instead of an `App.js` re-export, and does **not** ship a `babel.config.js` at all — the preset is applied implicitly. `jest-expo`'s preset also doesn't need a project `babel.config.js` to transform JSX. Steps below reflect this; if your scaffold output differs, adapt file names accordingly and only add a `babel.config.js` (via `npx expo customize babel.config.js`) if `npm test` or `expo export` actually fails without one.
 >
-> **Note (breaking API in `@testing-library/react-native` v14):** `render()` and `renderHook()` are now `async` — every call must be `await`ed and every test that uses them must be an `async` test function. All test code below already reflects this.
+> **Note (breaking API in `@testing-library/react-native` v14):** `render()`, `renderHook()`, and every `fireEvent.*` call (`fireEvent.press`, `fireEvent.changeText`, etc.) are now `async` — every call must be `await`ed and every test that uses them must be an `async` test function. Skipping `await` on `fireEvent` doesn't throw, it just silently leaves the resulting state update unflushed, so the next synchronous assertion sees stale output (and Jest logs "overlapping act() calls" warnings that bleed into later tests in the same file). All test code below already reflects this.
 
 - [ ] **Step 1: Scaffold a throwaway Expo project to source current versions and boilerplate**
 
@@ -509,7 +509,7 @@ test('renders the policy title', async () => {
 test('calls onBack when a back link is pressed', async () => {
   const onBack = jest.fn()
   await render(<PrivacyPolicy onBack={onBack} />)
-  fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
+  await fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
   expect(onBack).toHaveBeenCalledTimes(1)
 })
 ```
@@ -693,7 +693,7 @@ beforeEach(() => {
 test('shows validation errors when submitted empty', async () => {
   await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
-  fireEvent.press(screen.getByTestId('meeting-submit'))
+  await fireEvent.press(screen.getByTestId('meeting-submit'))
 
   expect(screen.getByText('Adını daxil et')).toBeTruthy()
   expect(screen.getByText('E-poçt ünvanını daxil et')).toBeTruthy()
@@ -706,11 +706,11 @@ test('submits sanitized fields and shows a success message', async () => {
   sendEvent.mockResolvedValue()
   await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
-  fireEvent.changeText(screen.getByTestId('meeting-name'), '  Aygün  ')
-  fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
-  fireEvent.changeText(screen.getByTestId('meeting-topic'), 'Layihə müzakirəsi')
-  fireEvent.press(screen.getByTestId('meeting-consent'))
-  fireEvent.press(screen.getByTestId('meeting-submit'))
+  await fireEvent.changeText(screen.getByTestId('meeting-name'), '  Aygün  ')
+  await fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
+  await fireEvent.changeText(screen.getByTestId('meeting-topic'), 'Layihə müzakirəsi')
+  await fireEvent.press(screen.getByTestId('meeting-consent'))
+  await fireEvent.press(screen.getByTestId('meeting-submit'))
 
   await waitFor(() => {
     expect(screen.getByText('Görüş tələbiniz göndərildi. Tezliklə əlaqə saxlayacağıq.')).toBeTruthy()
@@ -726,11 +726,11 @@ test('shows an error message when the webhook call fails', async () => {
   sendEvent.mockRejectedValue(new Error('network'))
   await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
-  fireEvent.changeText(screen.getByTestId('meeting-name'), 'Aygün')
-  fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
-  fireEvent.changeText(screen.getByTestId('meeting-topic'), 'Layihə müzakirəsi')
-  fireEvent.press(screen.getByTestId('meeting-consent'))
-  fireEvent.press(screen.getByTestId('meeting-submit'))
+  await fireEvent.changeText(screen.getByTestId('meeting-name'), 'Aygün')
+  await fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
+  await fireEvent.changeText(screen.getByTestId('meeting-topic'), 'Layihə müzakirəsi')
+  await fireEvent.press(screen.getByTestId('meeting-consent'))
+  await fireEvent.press(screen.getByTestId('meeting-submit'))
 
   await waitFor(() => {
     expect(screen.getByText('Göndərilmədi, bir azdan yenidən cəhd et.')).toBeTruthy()
@@ -741,7 +741,7 @@ test('calls onOpenPrivacy when the consent privacy link is pressed', async () =>
   const onOpenPrivacy = jest.fn()
   await render(<MeetingForm onOpenPrivacy={onOpenPrivacy} />)
 
-  fireEvent.press(screen.getByTestId('meeting-privacy-link'))
+  await fireEvent.press(screen.getByTestId('meeting-privacy-link'))
 
   expect(onOpenPrivacy).toHaveBeenCalledTimes(1)
 })
@@ -967,7 +967,7 @@ test('renders the contact name and title', async () => {
 
 test('opens the email link when the email row is pressed', async () => {
   await render(<CardScreen onOpenPrivacy={() => {}} />)
-  fireEvent.press(screen.getByTestId('contact-link-email'))
+  await fireEvent.press(screen.getByTestId('contact-link-email'))
   expect(Linking.openURL).toHaveBeenCalledWith(`mailto:${CONTACT.email}`)
 })
 
@@ -975,7 +975,7 @@ test('saves the card via the webhook and shows a success message', async () => {
   sendEvent.mockResolvedValue()
   await render(<CardScreen onOpenPrivacy={() => {}} />)
 
-  fireEvent.press(screen.getByTestId('card-save-button'))
+  await fireEvent.press(screen.getByTestId('card-save-button'))
 
   await waitFor(() => {
     expect(screen.getByText('Kart yadda saxlanıldı.')).toBeTruthy()
@@ -987,7 +987,7 @@ test('shows an error message when the webhook call fails', async () => {
   sendEvent.mockRejectedValue(new Error('network'))
   await render(<CardScreen onOpenPrivacy={() => {}} />)
 
-  fireEvent.press(screen.getByTestId('card-save-button'))
+  await fireEvent.press(screen.getByTestId('card-save-button'))
 
   await waitFor(() => {
     expect(screen.getByText('Saxlanılmadı, bir azdan yenidən cəhd et.')).toBeTruthy()
@@ -997,7 +997,7 @@ test('shows an error message when the webhook call fails', async () => {
 test('calls onOpenPrivacy when the footer privacy link is pressed', async () => {
   const onOpenPrivacy = jest.fn()
   await render(<CardScreen onOpenPrivacy={onOpenPrivacy} />)
-  fireEvent.press(screen.getByTestId('open-privacy-link'))
+  await fireEvent.press(screen.getByTestId('open-privacy-link'))
   expect(onOpenPrivacy).toHaveBeenCalledTimes(1)
 })
 ```
@@ -1211,11 +1211,11 @@ test('shows the card screen by default', async () => {
 test('navigates to the privacy screen and back', async () => {
   await render(<App />)
 
-  fireEvent.press(screen.getByTestId('open-privacy-link'))
+  await fireEvent.press(screen.getByTestId('open-privacy-link'))
   expect(screen.getByText('Məxfilik Siyasəti')).toBeTruthy()
   expect(screen.queryByText(CONTACT.fullName)).toBeNull()
 
-  fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
+  await fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
   expect(screen.getByText(CONTACT.fullName)).toBeTruthy()
 })
 ```

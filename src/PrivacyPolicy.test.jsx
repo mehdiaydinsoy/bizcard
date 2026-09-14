@@ -9,6 +9,6 @@ test('renders the policy title', async () => {
 test('calls onBack when a back link is pressed', async () => {
   const onBack = jest.fn()
   await render(<PrivacyPolicy onBack={onBack} />)
-  fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
+  await fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
   expect(onBack).toHaveBeenCalledTimes(1)
 })
