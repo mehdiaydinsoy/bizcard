@@ -26,13 +26,17 @@
 ### Task 1: Scaffold the Expo project and test harness
 
 **Files:**
-- Create: `app.json`, `babel.config.js`, `assets/` (copied from a temporary scaffold)
-- Create: `App.js`, `src/App.jsx` (placeholder), `src/App.test.jsx`
+- Create: `app.json`, `assets/` (copied from a temporary scaffold)
+- Create: `index.js`, `src/App.jsx` (placeholder), `src/App.test.jsx`
 - Modify: `package.json` (rewritten for Expo), `.gitignore`, `.env`
 - Delete: `vite.config.js`, `index.html`, `privacy.html`, `src/main.jsx`, `src/privacy-main.jsx`, `src/App.css`, `.vercel/`
 
 **Interfaces:**
-- Produces: `src/App.jsx` exports a default React component (placeholder for now, replaced in Task 9). Root `App.js` re-exports it. Jest is runnable via `npm test`.
+- Produces: `src/App.jsx` exports a default React component (placeholder for now, replaced in Task 9). Root `index.js` calls `registerRootComponent` on it. Jest is runnable via `npm test`.
+
+> **Note (actual scaffold output may vary by SDK version):** the current Expo blank template (SDK 57) ships an `index.js` entry (`registerRootComponent(App)`) instead of an `App.js` re-export, and does **not** ship a `babel.config.js` at all — the preset is applied implicitly. `jest-expo`'s preset also doesn't need a project `babel.config.js` to transform JSX. Steps below reflect this; if your scaffold output differs, adapt file names accordingly and only add a `babel.config.js` (via `npx expo customize babel.config.js`) if `npm test` or `expo export` actually fails without one.
+>
+> **Note (breaking API in `@testing-library/react-native` v14):** `render()` and `renderHook()` are now `async` — every call must be `await`ed and every test that uses them must be an `async` test function. All test code below already reflects this.
 
 - [ ] **Step 1: Scaffold a throwaway Expo project to source current versions and boilerplate**
 
@@ -46,10 +50,11 @@ Expected: command completes without error; note the `expo`, `react`, and `react-
 
 - [ ] **Step 2: Copy the generated config/assets into the repo, then remove the scaffold**
 
+Inspect what the scaffold actually generated first (`ls "$SCAFFOLD_DIR/scaffold"`) — copy `babel.config.js` too only if it exists.
+
 ```bash
 cp "$SCAFFOLD_DIR/scaffold/package.json" ./package.json
 cp "$SCAFFOLD_DIR/scaffold/app.json" ./app.json
-cp "$SCAFFOLD_DIR/scaffold/babel.config.js" ./babel.config.js
 cp -r "$SCAFFOLD_DIR/scaffold/assets" ./assets
 rm -rf "$SCAFFOLD_DIR"
 ```
@@ -111,8 +116,8 @@ Create `src/App.test.jsx`:
 import { render, screen } from '@testing-library/react-native'
 import App from './App'
 
-test('renders a BizCard placeholder', () => {
-  render(<App />)
+test('renders a BizCard placeholder', async () => {
+  await render(<App />)
   expect(screen.getByText('BizCard')).toBeTruthy()
 })
 ```
@@ -122,7 +127,7 @@ test('renders a BizCard placeholder', () => {
 Run: `npm test -- src/App.test.jsx`
 Expected: FAIL — `src/App.jsx` still contains the old DOM-based JSX (`<div>`, CSS class names), which isn't valid inside React Native's renderer.
 
-- [ ] **Step 10: Replace `src/App.jsx` with a minimal RN placeholder and create root `App.js`**
+- [ ] **Step 10: Replace `src/App.jsx` with a minimal RN placeholder and create the root entry file**
 
 Overwrite `src/App.jsx`:
 
@@ -142,12 +147,14 @@ const styles = StyleSheet.create({
 })
 ```
 
-Create `App.js` at the repo root:
+Create `index.js` at the repo root (matches the scaffold's `"main": "index.js"`):
 
 ```js
+import { registerRootComponent } from 'expo'
+
 import App from './src/App'
 
-export default App
+registerRootComponent(App)
 ```
 
 - [ ] **Step 11: Run the test again and confirm it passes**
@@ -192,21 +199,21 @@ jest.mock('react-native', () => {
   return { ...actual, useColorScheme: jest.fn() }
 })
 
-test('returns light colors when the scheme is light', () => {
+test('returns light colors when the scheme is light', async () => {
   useColorScheme.mockReturnValue('light')
-  const { result } = renderHook(() => useTheme())
+  const { result } = await renderHook(() => useTheme())
   expect(result.current).toEqual(lightColors)
 })
 
-test('returns dark colors when the scheme is dark', () => {
+test('returns dark colors when the scheme is dark', async () => {
   useColorScheme.mockReturnValue('dark')
-  const { result } = renderHook(() => useTheme())
+  const { result } = await renderHook(() => useTheme())
   expect(result.current).toEqual(darkColors)
 })
 
-test('falls back to light colors when the scheme is unknown', () => {
+test('falls back to light colors when the scheme is unknown', async () => {
   useColorScheme.mockReturnValue(null)
-  const { result } = renderHook(() => useTheme())
+  const { result } = await renderHook(() => useTheme())
   expect(result.current).toEqual(lightColors)
 })
 ```
@@ -492,14 +499,14 @@ Create `src/PrivacyPolicy.test.jsx`:
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import PrivacyPolicy from './PrivacyPolicy'
 
-test('renders the policy title', () => {
-  render(<PrivacyPolicy onBack={() => {}} />)
+test('renders the policy title', async () => {
+  await render(<PrivacyPolicy onBack={() => {}} />)
   expect(screen.getByText('Məxfilik Siyasəti')).toBeTruthy()
 })
 
-test('calls onBack when a back link is pressed', () => {
+test('calls onBack when a back link is pressed', async () => {
   const onBack = jest.fn()
-  render(<PrivacyPolicy onBack={onBack} />)
+  await render(<PrivacyPolicy onBack={onBack} />)
   fireEvent.press(screen.getAllByTestId('privacy-back-link')[0])
   expect(onBack).toHaveBeenCalledTimes(1)
 })
@@ -681,8 +688,8 @@ beforeEach(() => {
   jest.clearAllMocks()
 })
 
-test('shows validation errors when submitted empty', () => {
-  render(<MeetingForm onOpenPrivacy={() => {}} />)
+test('shows validation errors when submitted empty', async () => {
+  await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
   fireEvent.press(screen.getByTestId('meeting-submit'))
 
@@ -695,7 +702,7 @@ test('shows validation errors when submitted empty', () => {
 
 test('submits sanitized fields and shows a success message', async () => {
   sendEvent.mockResolvedValue()
-  render(<MeetingForm onOpenPrivacy={() => {}} />)
+  await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
   fireEvent.changeText(screen.getByTestId('meeting-name'), '  Aygün  ')
   fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
@@ -715,7 +722,7 @@ test('submits sanitized fields and shows a success message', async () => {
 
 test('shows an error message when the webhook call fails', async () => {
   sendEvent.mockRejectedValue(new Error('network'))
-  render(<MeetingForm onOpenPrivacy={() => {}} />)
+  await render(<MeetingForm onOpenPrivacy={() => {}} />)
 
   fireEvent.changeText(screen.getByTestId('meeting-name'), 'Aygün')
   fireEvent.changeText(screen.getByTestId('meeting-email'), 'aygun@example.com')
@@ -728,9 +735,9 @@ test('shows an error message when the webhook call fails', async () => {
   })
 })
 
-test('calls onOpenPrivacy when the consent privacy link is pressed', () => {
+test('calls onOpenPrivacy when the consent privacy link is pressed', async () => {
   const onOpenPrivacy = jest.fn()
-  render(<MeetingForm onOpenPrivacy={onOpenPrivacy} />)
+  await render(<MeetingForm onOpenPrivacy={onOpenPrivacy} />)
 
   fireEvent.press(screen.getByTestId('meeting-privacy-link'))
 
@@ -950,21 +957,21 @@ beforeEach(() => {
   jest.spyOn(Linking, 'openURL').mockResolvedValue()
 })
 
-test('renders the contact name and title', () => {
-  render(<CardScreen onOpenPrivacy={() => {}} />)
+test('renders the contact name and title', async () => {
+  await render(<CardScreen onOpenPrivacy={() => {}} />)
   expect(screen.getByText(CONTACT.fullName)).toBeTruthy()
   expect(screen.getByText(CONTACT.title)).toBeTruthy()
 })
 
-test('opens the email link when the email row is pressed', () => {
-  render(<CardScreen onOpenPrivacy={() => {}} />)
+test('opens the email link when the email row is pressed', async () => {
+  await render(<CardScreen onOpenPrivacy={() => {}} />)
   fireEvent.press(screen.getByTestId('contact-link-email'))
   expect(Linking.openURL).toHaveBeenCalledWith(`mailto:${CONTACT.email}`)
 })
 
 test('saves the card via the webhook and shows a success message', async () => {
   sendEvent.mockResolvedValue()
-  render(<CardScreen onOpenPrivacy={() => {}} />)
+  await render(<CardScreen onOpenPrivacy={() => {}} />)
 
   fireEvent.press(screen.getByTestId('card-save-button'))
 
@@ -976,7 +983,7 @@ test('saves the card via the webhook and shows a success message', async () => {
 
 test('shows an error message when the webhook call fails', async () => {
   sendEvent.mockRejectedValue(new Error('network'))
-  render(<CardScreen onOpenPrivacy={() => {}} />)
+  await render(<CardScreen onOpenPrivacy={() => {}} />)
 
   fireEvent.press(screen.getByTestId('card-save-button'))
 
@@ -985,9 +992,9 @@ test('shows an error message when the webhook call fails', async () => {
   })
 })
 
-test('calls onOpenPrivacy when the footer privacy link is pressed', () => {
+test('calls onOpenPrivacy when the footer privacy link is pressed', async () => {
   const onOpenPrivacy = jest.fn()
-  render(<CardScreen onOpenPrivacy={onOpenPrivacy} />)
+  await render(<CardScreen onOpenPrivacy={onOpenPrivacy} />)
   fireEvent.press(screen.getByTestId('open-privacy-link'))
   expect(onOpenPrivacy).toHaveBeenCalledTimes(1)
 })
@@ -1174,7 +1181,7 @@ git commit -m "Add card screen: links, skills, QR code, webhook save"
 
 **Interfaces:**
 - Consumes: `CardScreen` (Task 8), `PrivacyPolicy` (Task 6), `useTheme` (Task 2).
-- Produces: default export `App()` — the full composed app, unchanged signature from Task 1 (root `App.js` needs no changes).
+- Produces: default export `App()` — the full composed app, unchanged signature from Task 1 (root `index.js` needs no changes).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1194,13 +1201,13 @@ jest.mock('react-native-qrcode-svg', () => {
 
 jest.mock('./webhook', () => ({ sendEvent: jest.fn().mockResolvedValue() }))
 
-test('shows the card screen by default', () => {
-  render(<App />)
+test('shows the card screen by default', async () => {
+  await render(<App />)
   expect(screen.getByText(CONTACT.fullName)).toBeTruthy()
 })
 
-test('navigates to the privacy screen and back', () => {
-  render(<App />)
+test('navigates to the privacy screen and back', async () => {
+  await render(<App />)
 
   fireEvent.press(screen.getByTestId('open-privacy-link'))
   expect(screen.getByText('Məxfilik Siyasəti')).toBeTruthy()
