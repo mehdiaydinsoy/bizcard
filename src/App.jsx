@@ -60,6 +60,12 @@ function CardQRCode() {
   )
 }
 
+function sanitizeInput(value) {
+  // Webhook payloadı e-poçt/panel kimi HTML kontekstlərinə düşə bilər,
+  // ona görə teq yarada biləcək simvolları kənarda kəsirik
+  return value.replace(/[<>]/g, '').trim()
+}
+
 function downloadVCard() {
   const vcard = [
     'BEGIN:VCARD',
@@ -102,9 +108,13 @@ export default function App() {
   async function handleMeetingSubmit(e) {
     e.preventDefault()
 
-    const name = meetingFields.name.trim()
-    const email = meetingFields.email.trim()
-    const topic = meetingFields.topic.trim()
+    if (meetingStatus === 'sending') {
+      return
+    }
+
+    const name = sanitizeInput(meetingFields.name)
+    const email = sanitizeInput(meetingFields.email)
+    const topic = sanitizeInput(meetingFields.topic)
     const nextErrors = {}
 
     if (!name) {
