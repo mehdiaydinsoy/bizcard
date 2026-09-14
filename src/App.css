@@ -1,7 +1,7 @@
 :root {
   --bg-1: #eef1f6;
   --bg-2: #dfe6f0;
-  --card-bg: #F54927;
+  --card-bg: #ffffff;
   --text-main: #1c2230;
   --text-sub: #5b6472;
   --accent: #3457d5;
@@ -15,7 +15,7 @@
   :root {
     --bg-1: #0f1420;
     --bg-2: #161d2e;
-    --card-bg: #F54927;
+    --card-bg: #1a2138;
     --text-main: #f1f4fa;
     --text-sub: #9aa5b8;
     --accent: #7c93ff;
